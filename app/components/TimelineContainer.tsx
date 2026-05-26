@@ -517,6 +517,7 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
   const itemsContainerRef = useRef<HTMLDivElement | null>(null);
   const railFillRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Array<HTMLElement | null>>([]);
+  const intendedIdxRef = useRef(0);
 
   // Process data: combine DB rows with the Rubenius fallback narrative
   const processedItems: ProcessedItem[] = useMemo(() => (
@@ -608,31 +609,115 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
       }
     };
 
+    // Strict one-slide-per-gesture navigation.
+    //   - intendedIdxRef tracks the slide we're navigating *to* (stable, never reads mid-animation scrollLeft)
+    //   - wheelLock blocks during the smooth-scroll animation
+    //   - gesture detection blocks trackpad momentum from firing a second slide change
     let wheelLock = false;
-    const handleWheel = (e: WheelEvent) => {
-      // Convert vertical wheel into one-slide-at-a-time horizontal snap
-      const dominant = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (Math.abs(dominant) < 8) return;
+    let unlockTimer: ReturnType<typeof setTimeout> | null = null;
+    let lastWheelAt = 0;
+    let gestureFired = false;
+    const GESTURE_GAP_MS = 280; // wheel events closer than this are part of the same gesture (momentum)
+    const ANIM_LOCK_MS = 800;
 
-      const slideWidth = container.clientWidth;
-      const currentIdx = Math.round(container.scrollLeft / slideWidth);
-      const direction = dominant > 0 ? 1 : -1;
-      const targetIdx = currentIdx + direction;
+    const moveBy = (direction: 1 | -1): boolean => {
+      const next = intendedIdxRef.current + direction;
+      if (next < 0 || next >= processedItems.length) return false;
 
-      // Let the page take over at the boundaries
-      if (targetIdx < 0 || targetIdx >= processedItems.length) return;
+      intendedIdxRef.current = next;
+      container.scrollTo({ left: next * container.clientWidth, behavior: "smooth" });
 
-      e.preventDefault();
-      if (wheelLock) return;
       wheelLock = true;
-      container.scrollTo({ left: targetIdx * slideWidth, behavior: "smooth" });
-      setTimeout(() => {
+      if (unlockTimer) clearTimeout(unlockTimer);
+      unlockTimer = setTimeout(() => {
         wheelLock = false;
-      }, 600);
+      }, ANIM_LOCK_MS);
+      return true;
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      const dominant = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (Math.abs(dominant) < 4) return;
+
+      const direction: 1 | -1 = dominant > 0 ? 1 : -1;
+      const wouldBeNext = intendedIdxRef.current + direction;
+      if (wouldBeNext < 0 || wouldBeNext >= processedItems.length) return;
+
+      // Always block native scroll while we own the gesture
+      e.preventDefault();
+
+      // Identify gesture boundaries by time gap between events
+      const now = performance.now();
+      const isNewGesture = now - lastWheelAt > GESTURE_GAP_MS;
+      lastWheelAt = now;
+      if (isNewGesture) gestureFired = false;
+
+      if (gestureFired) return; // momentum from the same gesture — ignore
+      if (wheelLock) return;    // animation still running
+
+      gestureFired = true;
+      moveBy(direction);
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (wheelLock) return;
+      if (e.key === "ArrowRight" || e.key === "PageDown") {
+        if (moveBy(1)) e.preventDefault();
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        if (moveBy(-1)) e.preventDefault();
+      } else if (e.key === "Home") {
+        intendedIdxRef.current = 0;
+        container.scrollTo({ left: 0, behavior: "smooth" });
+        e.preventDefault();
+      } else if (e.key === "End") {
+        const last = processedItems.length - 1;
+        intendedIdxRef.current = last;
+        container.scrollTo({ left: last * container.clientWidth, behavior: "smooth" });
+        e.preventDefault();
+      }
+    };
+
+    // Touch-swipe: enforce one-slide-per-swipe so a fast fling can't skip slides
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchActive = false;
+    let touchFired = false;
+    const TOUCH_THRESHOLD = 40;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchActive = true;
+      touchFired = false;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!touchActive || touchFired) {
+        e.preventDefault();
+        return;
+      }
+      const dx = e.touches[0].clientX - touchStartX;
+      const dy = e.touches[0].clientY - touchStartY;
+      // Commit only on a clearly horizontal swipe over the threshold
+      if (Math.abs(dx) > TOUCH_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+        e.preventDefault();
+        if (!wheelLock) {
+          touchFired = true;
+          moveBy(dx < 0 ? 1 : -1);
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      touchActive = false;
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     container.addEventListener("wheel", handleWheel, { passive: false });
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+    container.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("keydown", handleKey);
     window.addEventListener("resize", layoutGhosts);
 
     handleScroll();
@@ -641,7 +726,12 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
     return () => {
       container.removeEventListener("scroll", handleScroll);
       container.removeEventListener("wheel", handleWheel);
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchmove", handleTouchMove);
+      container.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("keydown", handleKey);
       window.removeEventListener("resize", layoutGhosts);
+      if (unlockTimer) clearTimeout(unlockTimer);
     };
   }, [processedItems]);
 
@@ -687,6 +777,7 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
   const scrollToItem = (idx: number) => {
     const container = itemsContainerRef.current;
     if (container) {
+      intendedIdxRef.current = idx;
       container.scrollTo({ left: idx * container.clientWidth, behavior: "smooth" });
     }
   };
