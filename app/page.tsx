@@ -1,6 +1,7 @@
 import { prisma } from "./lib/prisma";
 import TimelineCanvas from "./components/TimelineCanvas";
 import TimelineContainer from "./components/TimelineContainer";
+import AddAchievement from "./components/AddAchievement";
 
 export const revalidate = 0; // Disable static rendering caching to allow dynamic updates
 
@@ -69,6 +70,8 @@ export default async function Home() {
           <span className="rb-tag">Rubenius Experiential Design System</span>
         </span>
       </a>
+
+      <AddAchievement />
 
       <TimelineContainer initialYears={dbYears} />
     </main>
