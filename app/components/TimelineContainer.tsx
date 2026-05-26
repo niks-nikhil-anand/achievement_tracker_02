@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-// Fallback/Default Foundry achievements timeline data matching original design
-const FOUNDRY_FALLBACKS: Record<
+// Fallback timeline data for Rubenius Interiors — sourced from rubenius.in awards & milestones
+const RUBENIUS_FALLBACKS: Record<
   number,
   {
     era: string;
@@ -14,160 +14,147 @@ const FOUNDRY_FALLBACKS: Record<
     stats: Array<{ label: string; value: string }>;
   }
 > = {
-  2007: {
-    era: "Founding",
-    delta: "— founding",
-    tag: "Origin",
-    title: "A controls team forms in a portable trailer outside Baytown.",
+  2005: {
+    era: "Origin",
+    delta: "— Rubenius founded",
+    tag: "Founded",
+    title: "Rubenius Interiors is established in Bangalore.",
     description:
-      "Four engineers, one spreadsheet, and a refinery turnaround that nobody else wanted. Foundry began as a service contract — keep the schedule honest, keep the procurement log clean, keep the field reporting up to date.",
+      "The studio begins with a single conviction: space is a business instrument, not decoration. The Interior Wellbeing™ philosophy takes root here and quietly sets the foundation for what becomes the REDS methodology.",
     stats: [
-      { label: "Headcount", value: "4" },
-      { label: "First project", value: "Refinery TAR-07" },
-      { label: "Office", value: "1× trailer" },
+      { label: "Founded", value: "2005" },
+      { label: "HQ", value: "Bangalore" },
+      { label: "Discipline", value: "Experience design" },
     ],
   },
-  2010: {
-    era: "First product",
-    delta: "+ first software release",
-    tag: "Product",
-    title: "Field Log ships — the spreadsheet finally leaves the trailer.",
+  2016: {
+    era: "First major recognition",
+    delta: "+ IQA Karnataka",
+    tag: "IQA",
+    title: "IQA Award — Excellence in Interior Designing Services, Karnataka.",
     description:
-      "What started as an internal workbook for daily reports becomes Foundry's first piece of software. Three EPC contractors sign on within six months. The product roadmap is written in pencil, on the back of a P&ID.",
+      "Eleven years of work earns the studio its first major regional honour. A Nispana Innovative Award for sustainable smart-cities work lands in the same year.",
     stats: [
-      { label: "Customers", value: "3" },
-      { label: "Reports filed", value: "14,200" },
-      { label: "Series A", value: "$6.4M" },
-    ],
-  },
-  2013: {
-    era: "Across the desk",
-    delta: "+ procurement, schedule",
-    tag: "Expansion",
-    title: "Procurement and Schedule launch. One platform, three desks.",
-    description:
-      "The PO log lands in the same database as the field report. Project controllers stop reconciling between Primavera, Excel and email. Foundry now sits between the trailer and the home office on every project it touches.",
-    stats: [
-      { label: "Active projects", value: "42" },
-      { label: "POs tracked", value: "61,800" },
-      { label: "Team", value: "38" },
-    ],
-  },
-  2015: {
-    era: "Crew + cost",
-    delta: "+ crew, labour",
-    tag: "Crew",
-    title: "Crew, cost and craft hours converge in one ledger.",
-    description:
-      "Time entry, daily reports and labour cost roll up into the same view controllers already know. Foreman tablets become the source-of-truth for craft hours across thirty-one active jobsites.",
-    stats: [
-      { label: "Active sites", value: "31" },
-      { label: "Foreman tablets", value: "1,400" },
-      { label: "Hours / week", value: "320k" },
+      { label: "Award", value: "IQA" },
+      { label: "Region", value: "Karnataka" },
+      { label: "Also", value: "Nispana" },
     ],
   },
   2017: {
-    era: "Going global",
-    delta: "+ EMEA, APAC",
-    tag: "Scale",
-    title: "Rotterdam and Singapore come online — coverage follows the shipping lanes.",
+    era: "Residential at scale",
+    delta: "+ FOAID Best Villa",
+    tag: "FOAID",
+    title: "FOAID — Best Interior, Residential Villa Large.",
     description:
-      "The first multi-currency, multi-language deployment lands with a Dutch midstream operator. Within eighteen months Foundry runs the controls cadence on projects across nineteen countries and four continents.",
+      "The studio's first national FOAID win lands for a large villa interior. The Economic Times also recognises Rubenius among India's Top 5 Smart Green Workplaces.",
     stats: [
-      { label: "Countries", value: "19" },
-      { label: "Languages", value: "7" },
-      { label: "Series C", value: "$84M" },
+      { label: "FOAID", value: "Best Villa" },
+      { label: "Recognition", value: "ET Top 5" },
+      { label: "Theme", value: "Smart Green" },
+    ],
+  },
+  2018: {
+    era: "Retail experience",
+    delta: "+ FOAID Best Retail",
+    tag: "Retail",
+    title: "FOAID — Best Interior Retail, India.",
+    description:
+      "The studio's first national retail design award. Retail emerges as a strategic discipline within the practice — each store treated as a brand environment, not a fixture programme.",
+    stats: [
+      { label: "FOAID", value: "Best Retail" },
+      { label: "Scope", value: "India" },
+      { label: "Discipline", value: "Retail" },
     ],
   },
   2019: {
-    era: "Field-first",
-    delta: "× Foundry Field v2",
-    tag: "Mobile",
-    title: "Field gets a second pass — offline-first, photo-aware, sub-second.",
+    era: "Multi-award year",
+    delta: "+ four 2019 honours",
+    tag: "Awards",
+    title: "FOAID Retail repeats. SCCI, IA&B Young Designer, Creative Minds.",
     description:
-      "Two years of customer wear-and-tear feedback rolls into a ground-up mobile rewrite. RFIs, observations and punch items now sync the moment a tablet sees a tower again.",
+      "Back-to-back FOAID wins for retail are joined by Young Designer and Creative Minds awards for commercial interiors. The studio's commercial practice gains momentum.",
     stats: [
-      { label: "Offline ops", value: "Full" },
-      { label: "Photos / month", value: "480k" },
-      { label: "Sync latency", value: "< 800ms" },
+      { label: "Awards", value: "4" },
+      { label: "Categories", value: "Retail · Commercial" },
+      { label: "Year", value: "2019" },
+    ],
+  },
+  2020: {
+    era: "Pandemic response",
+    delta: "× lockdown year",
+    tag: "D'Source",
+    title: "D'Source IIT Bombay — Winner, Product Solutions for the Pandemic.",
+    description:
+      "When the built world stops, Rubenius turns to product. IIT Bombay's D'Source recognises two distinct pandemic solutions. Tech Briefs adds two 'Most Popular Innovation' awards.",
+    stats: [
+      { label: "D'Source", value: "2 wins" },
+      { label: "Tech Briefs", value: "2 wins" },
+      { label: "Category", value: "Pandemic Product" },
     ],
   },
   2021: {
-    era: "Crisis, then clarity",
-    delta: "× pandemic year",
-    tag: "Resilience",
-    title: "Site offices empty. Foundry Field carries the load.",
+    era: "International stage",
+    delta: "+ Lexus × 3",
+    tag: "Lexus",
+    title: "Lexus Design Awards — three categories in one year.",
     description:
-      "The mobile app — quietly in development for two years — is pulled forward and shipped in eleven weeks. Superintendents file punch lists from their phones at half-capacity sites. Not a single customer cancels.",
+      "Lexus recognises the studio across Public Utility Design, Design Thinking and Product Design. Kyoorius Design Yatra adds a product win. Eldrock honours residential public space. BSI, Mango and Nestle round out a record year.",
     stats: [
-      { label: "Field installs", value: "21,400" },
-      { label: "Uptime", value: "99.98%" },
-      { label: "Retention", value: "100%" },
+      { label: "Lexus", value: "3 wins" },
+      { label: "Total", value: "8+ awards" },
+      { label: "Year", value: "2021" },
     ],
   },
   2022: {
-    era: "The data layer",
-    delta: "+ Foundry Intelligence",
-    tag: "Intelligence",
-    title: "Variance forecasting goes live across every active baseline.",
+    era: "Workspace innovation",
+    delta: "+ Spaciux Platinum",
+    tag: "Workspace",
+    title: "Schneider Experience Centre. Spaciux Platinum — Large Work Space Design.",
     description:
-      "Fifteen years of schedule and cost history finally pay a dividend. Foundry Intelligence forecasts EVM variance four weeks out at an 86% confidence interval. The first early-warning emails arrive in controllers' inboxes on a Tuesday.",
+      "A 3,000-sqft Schneider Electric Experience Centre showcases voice-activated AI, parametric audio and IoT — winning FOAID's Innovative Experience Centre of the Year. Spaciux Platinum, Young Designer of the Year and A.C.E.D. recognitions follow.",
     stats: [
-      { label: "Models in prod", value: "11" },
-      { label: "Forecast accuracy", value: "86%" },
-      { label: "Hours saved / wk", value: "3,200" },
+      { label: "Spaciux", value: "Platinum" },
+      { label: "Schneider", value: "3,000 sqft" },
+      { label: "Format", value: "AI · IoT" },
     ],
   },
   2023: {
-    era: "Beyond forecasting",
-    delta: "+ Intelligence v2",
-    tag: "Models",
-    title: "Prescriptive moves replace the early-warning email.",
+    era: "Top 40",
+    delta: "+ IGEN India Top 40",
+    tag: "Industry",
+    title: "IGEN — India's Top 40 designers. FOAID India 10 retail.",
     description:
-      "Variance forecasts arrive with proposed schedule and crew interventions, scored against historical precedent. Controllers start adopting model recommendations as the first draft of their re-baseline.",
+      "Construction Week names Rubenius Interior Contractor of the Year. Architect & Interiors India recognises the studio for Future Design. FOAID's India 10 names it among the country's top retail interior practices.",
     stats: [
-      { label: "Recs / day", value: "4,800" },
-      { label: "Adoption rate", value: "71%" },
-      { label: "Models in prod", value: "24" },
+      { label: "IGEN", value: "Top 40" },
+      { label: "FOAID", value: "India 10" },
+      { label: "Industry", value: "Contractor of the Year" },
     ],
   },
   2024: {
-    era: "Capital under management",
-    delta: "$ crossed $200B",
-    tag: "Milestone",
-    title: "$200B of capital projects now run through Foundry.",
+    era: "Technology integration",
+    delta: "+ Design Milestone",
+    tag: "Innovation",
+    title: "Design Milestone — Innovative Technology Integration.",
     description:
-      "Two-thirds of the Engineering News-Record Top 100 sit on the platform. The blueprint view — the one drawn on a whiteboard in 2009 — quietly becomes the way most of the industry plans a turnaround.",
+      "The studio's interactive and immersive practice — combining hardware, software and physical space — earns a Design Milestone Award. Spaceiux recognises shopping-space design and FOAID adds a Bronze.",
     stats: [
-      { label: "CAPEX on platform", value: "$200B" },
-      { label: "ENR Top-100", value: "68 / 100" },
-      { label: "Active users", value: "141,000" },
+      { label: "Awards", value: "3" },
+      { label: "Milestone", value: "Tech Integration" },
+      { label: "Format", value: "Spaceiux · FOAID" },
     ],
   },
   2025: {
-    era: "Program scale",
-    delta: "+ portfolio rollups",
-    tag: "Portfolio",
-    title: "Multi-program rollups land — eighty-five projects on one cadence.",
+    era: "Twenty years",
+    delta: "→ FOAID On Going",
+    tag: "Current",
+    title: "FOAID — On Going Project. Two decades of Interior Wellbeing.",
     description:
-      "Owners and EPCs running parallel megaprograms get a single cadence view. Variance, float consumption and labour productivity now compare like-for-like across an entire capital portfolio.",
+      "A project still in motion enters the FOAID circuit. Twenty years on, the practice continues to treat every brief as a chance to shape how a brand is remembered.",
     stats: [
-      { label: "Programs live", value: "12" },
-      { label: "Projects rolled up", value: "85" },
-      { label: "Cross-program insights", value: "Live" },
-    ],
-  },
-  2026: {
-    era: "What's next",
-    delta: "→ chapter eight",
-    tag: "Next",
-    title: "One operating model for every project, from FEED to handover.",
-    description:
-      "This year we close the last seam — engineering and field on a single graph, with every RFI, change order and material movement priced to a live baseline. Nineteen years of work, one cadence.",
-    stats: [
-      { label: "Roadmap", value: "Unified graph" },
-      { label: "Beta partners", value: "14" },
-      { label: "Ship", value: "Q4 · 2026" },
+      { label: "FOAID", value: "On Going" },
+      { label: "Year", value: "2025" },
+      { label: "Anniversary", value: "20 years" },
     ],
   },
 };
@@ -178,81 +165,96 @@ type Media =
   | { type: "image"; url: string; alt: string; pos: MediaSlot }
   | { type: "video"; url: string; poster?: string; alt: string; pos: MediaSlot };
 
-const UNSPLASH = (id: string, w = 480) =>
-  `https://images.unsplash.com/${id}?w=${w}&q=80&auto=format&fit=crop`;
+// Rubenius CDN assets — extracted from rubenius.in
+const R_CDN = "https://cdn.prod.website-files.com/61bcac7a8c69b70a365c2b95";
+const R_CDN2 = "https://cdn.prod.website-files.com/61bcac7b8c69b74b8d5c2b99";
 
-const FOUNDRY_MEDIA: Record<number, Media[]> = {
-  2007: [
-    { type: "image", url: UNSPLASH("photo-1518709268805-4e9042af2176"), alt: "Industrial plant at dusk", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1581094794329-c8112a89af12"), alt: "Engineering blueprint", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1473341304170-971dccb5ac1e"), alt: "Pipework", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1542838132-92c53300491e"), alt: "Refinery skyline", pos: "br" },
+// Direct paths to real Rubenius project & brand imagery
+const RB = {
+  scroll: `${R_CDN}/61c3f74e753d19e73070ac09_scrolling-header.webp`,
+  untitled3: `${R_CDN}/6720d61873312b5a0e2097f9_Untitled%20design%20(3).webp`,
+  redsShift12: `${R_CDN2}/6a02bdbca906b5099cfae7db_The%20REDS%20Rubenius%E2%80%99%20Shift%20(12).png`,
+  redsShift17: `${R_CDN2}/6a02bf21682a23382ce34896_The%20REDS%20Rubenius%E2%80%99%20Shift%20(17).png`,
+  redsShift21: `${R_CDN2}/6a02c071e51c6bd6efe1320f_The%20REDS%20Rubenius%E2%80%99%20Shift%20(21).png`,
+  schneiderCase: `${R_CDN2}/61ca86f993dac14aaa618b68_Schneider-case.avif`,
+  schneiderCard: `${R_CDN2}/65f02ce6fb636d0b1982c3b6_3.webp`,
+  schneider7: `${R_CDN2}/61ebd4ed95b75977736dadbf_Schneider-Electric-7.webp`,
+  schneider8: `${R_CDN2}/61ebd4edd0df78bb9d7f649f_Schneider-Electric-8.webp`,
+  schneider9: `${R_CDN2}/61ebd4edd0df78b7817f64a0_Schneider-Electric-9.jpg`,
+  schneider10: `${R_CDN2}/61ebd4f13eec5941b0232c5d_Schneider-Electric-10.avif`,
+  schneider13: `${R_CDN2}/61ebd4f12c005b93d2e8b12f_Schneider-Electric-13.webp`,
+  schneider14: `${R_CDN2}/61ebd4f129adecfc59dd2d50_Schneider-Electric-14.avif`,
+  schneider23: `${R_CDN2}/6729ac2431f07097dd1b7c4e_23.jpg`,
+  scaler: `${R_CDN2}/67e29e31a6a4b0f3852d306a_Untitled%20design%20(1).jpg`,
+  kewaunee: `${R_CDN2}/65f57f88932733bcfc487e99_Website%20Project%20images.avif`,
+};
+
+const RUBENIUS_MEDIA: Record<number, Media[]> = {
+  2005: [
+    { type: "image", url: RB.scroll, alt: "Rubenius brand wordmark", pos: "tl" },
+    { type: "image", url: RB.untitled3, alt: "Interior Wellbeing strategy", pos: "tr" },
+    { type: "image", url: RB.redsShift12, alt: "REDS Shift — origin", pos: "bl" },
+    { type: "image", url: RB.redsShift17, alt: "REDS Shift — practice", pos: "br" },
   ],
-  2010: [
-    { type: "image", url: UNSPLASH("photo-1497366216548-37526070297c"), alt: "Laptop on a desk", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1517245386807-bb43f82c33c4"), alt: "Code on monitor", pos: "tr" },
-    { type: "video", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", alt: "Team in motion", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1497366811353-6870744d04b2"), alt: "Open laptop", pos: "br" },
-  ],
-  2013: [
-    { type: "image", url: UNSPLASH("photo-1554224155-6726b3ff858f"), alt: "Spreadsheets and procurement", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1497032628192-86f99bcd76bc"), alt: "Office floor", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1556761175-5973dc0f32e7"), alt: "Team meeting", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1551836022-d5d88e9218df"), alt: "Schedule planning", pos: "br" },
-  ],
-  2015: [
-    { type: "image", url: UNSPLASH("photo-1504917595217-d4dc5ebe6122"), alt: "Crew on site", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1581094024226-2eeb1c1aae42"), alt: "Construction crew", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1593113598332-cd288d649433"), alt: "Tablet on a jobsite", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1581092335397-9583eb92d232"), alt: "Foreman with hardhat", pos: "br" },
+  2016: [
+    { type: "image", url: RB.scaler, alt: "Scaler Innovation Lab", pos: "tl" },
+    { type: "image", url: RB.untitled3, alt: "Karnataka practice", pos: "tr" },
+    { type: "image", url: RB.kewaunee, alt: "Kewaunee International", pos: "bl" },
+    { type: "image", url: RB.redsShift21, alt: "REDS Shift — recognition", pos: "br" },
   ],
   2017: [
-    { type: "image", url: UNSPLASH("photo-1577563908411-5077b6dc7624"), alt: "Container port", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1605745341112-85968b19335b"), alt: "Logistics yard", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1473093295043-cdd812d0e601"), alt: "Global city skyline", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1494522855154-9297ac14b55f"), alt: "Travel routes", pos: "br" },
+    { type: "image", url: RB.scaler, alt: "Residential villa interior", pos: "tl" },
+    { type: "image", url: RB.schneider23, alt: "Villa detail", pos: "tr" },
+    { type: "image", url: RB.redsShift12, alt: "REDS Shift — residential", pos: "bl" },
+    { type: "image", url: RB.untitled3, alt: "Smart green workplace", pos: "br" },
+  ],
+  2018: [
+    { type: "image", url: RB.kewaunee, alt: "Retail experience interior", pos: "tl" },
+    { type: "image", url: RB.schneiderCard, alt: "Retail brand environment", pos: "tr" },
+    { type: "image", url: RB.redsShift17, alt: "REDS Shift — retail", pos: "bl" },
+    { type: "image", url: RB.schneiderCase, alt: "Experience design", pos: "br" },
   ],
   2019: [
-    { type: "image", url: UNSPLASH("photo-1512941937669-90a1b58e7e9c"), alt: "Tablet in the field", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1581094288338-2314dddb7ece"), alt: "Site walk", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1581092580497-e0d23cbdf1dc"), alt: "Mobile field tools", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1556761175-b413da4baf72"), alt: "Field tech check", pos: "br" },
+    { type: "image", url: RB.schneiderCard, alt: "Commercial interior", pos: "tl" },
+    { type: "image", url: RB.kewaunee, alt: "Retail design — repeat win", pos: "tr" },
+    { type: "image", url: RB.redsShift17, alt: "REDS Shift — commercial", pos: "bl" },
+    { type: "image", url: RB.redsShift21, alt: "REDS Shift — innovation", pos: "br" },
+  ],
+  2020: [
+    { type: "image", url: RB.redsShift17, alt: "REDS Shift — pandemic", pos: "tl" },
+    { type: "image", url: RB.redsShift21, alt: "Pandemic product solution", pos: "tr" },
+    { type: "image", url: RB.untitled3, alt: "D'Source winning design", pos: "bl" },
+    { type: "image", url: RB.redsShift12, alt: "REDS Shift — distance", pos: "br" },
   ],
   2021: [
-    { type: "image", url: UNSPLASH("photo-1521737711867-e3b97375f902"), alt: "Remote work setup", pos: "tl" },
-    { type: "video", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", alt: "On-site mobile", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1551836022-deb4988cc6c0"), alt: "Empty office", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1556761175-5973dc0f32e7"), alt: "Distributed team", pos: "br" },
+    { type: "image", url: RB.redsShift21, alt: "Lexus public-utility design", pos: "tl" },
+    { type: "image", url: RB.redsShift12, alt: "Kyoorius product design", pos: "tr" },
+    { type: "image", url: RB.untitled3, alt: "Eldrock residential public", pos: "bl" },
+    { type: "image", url: RB.scaler, alt: "Design thinking", pos: "br" },
   ],
   2022: [
-    { type: "image", url: UNSPLASH("photo-1551288049-bebda4e38f71"), alt: "Analytics dashboard", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1460925895917-afdab827c52f"), alt: "Data visualization", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1543286386-713bdd548da4"), alt: "Charts on screen", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1518770660439-4636190af475"), alt: "Circuit board", pos: "br" },
+    { type: "image", url: RB.schneiderCase, alt: "Schneider Experience Centre", pos: "tl" },
+    { type: "image", url: RB.schneider9, alt: "Schneider — voice AI", pos: "tr" },
+    { type: "image", url: RB.schneider8, alt: "Schneider — parametric audio", pos: "bl" },
+    { type: "image", url: RB.schneider14, alt: "Schneider — anamorphic lighting", pos: "br" },
   ],
   2023: [
-    { type: "image", url: UNSPLASH("photo-1620712943543-bcc4688e7485"), alt: "AI model visualization", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1677442136019-21780ecad995"), alt: "Neural network", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1551434678-e076c223a692"), alt: "Team reviewing forecasts", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1551288049-bebda4e38f71"), alt: "Prescriptive dashboard", pos: "br" },
+    { type: "image", url: RB.scaler, alt: "Scaler Innovation Lab — Future Design", pos: "tl" },
+    { type: "image", url: RB.kewaunee, alt: "Kewaunee International — retail", pos: "tr" },
+    { type: "image", url: RB.schneider7, alt: "Schneider Centre detail", pos: "bl" },
+    { type: "image", url: RB.schneider13, alt: "Interior contracting craft", pos: "br" },
   ],
   2024: [
-    { type: "image", url: UNSPLASH("photo-1486406146926-c627a92ad1ab"), alt: "Skyscraper construction", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1502920917128-1aa500764cbd"), alt: "Tower crane silhouette", pos: "tr" },
-    { type: "video", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", alt: "Project ribbon cut", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1503387762-592deb58ef4e"), alt: "City under build", pos: "br" },
+    { type: "image", url: RB.schneider10, alt: "Schneider — IoT integration", pos: "tl" },
+    { type: "image", url: RB.schneider14, alt: "Technology integration", pos: "tr" },
+    { type: "image", url: RB.schneider23, alt: "Spaceiux shopping space", pos: "bl" },
+    { type: "image", url: RB.schneiderCard, alt: "Innovative experience centre", pos: "br" },
   ],
   2025: [
-    { type: "image", url: UNSPLASH("photo-1542744173-8e7e53415bb0"), alt: "Program rollup meeting", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1559136555-9303baea8ebd"), alt: "Portfolio dashboards", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1591696205602-2f950c417cb9"), alt: "Project portfolio", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1551836022-d5d88e9218df"), alt: "Strategy planning", pos: "br" },
-  ],
-  2026: [
-    { type: "image", url: UNSPLASH("photo-1485827404703-89b55fcc595e"), alt: "Future workflow", pos: "tl" },
-    { type: "image", url: UNSPLASH("photo-1581094794329-c8112a89af12"), alt: "Blueprint detail", pos: "tr" },
-    { type: "image", url: UNSPLASH("photo-1531297484001-80022131f5a1"), alt: "Connected lights", pos: "bl" },
-    { type: "image", url: UNSPLASH("photo-1518770660439-4636190af475"), alt: "Network of lights", pos: "br" },
+    { type: "image", url: RB.scaler, alt: "On going project — Scaler", pos: "tl" },
+    { type: "image", url: RB.kewaunee, alt: "Current work — Kewaunee", pos: "tr" },
+    { type: "image", url: RB.untitled3, alt: "Twenty-year anniversary", pos: "bl" },
+    { type: "image", url: RB.redsShift12, alt: "REDS — still shaping memory", pos: "br" },
   ],
 };
 
@@ -307,19 +309,19 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
   const railFillRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Array<HTMLElement | null>>([]);
 
-  // Process data: Combine DB data with Foundry template rules & fallbacks
+  // Process data: combine DB rows with the Rubenius fallback narrative
   const processedItems: ProcessedItem[] = useMemo(() => (
     initialYears && initialYears.length > 0
       ? [...initialYears].sort((a, b) => a.year - b.year)
-      : Object.keys(FOUNDRY_FALLBACKS).map((yr) => ({
+      : Object.keys(RUBENIUS_FALLBACKS).map((yr) => ({
           id: yr,
           year: parseInt(yr),
-          about: FOUNDRY_FALLBACKS[parseInt(yr)].description,
+          about: RUBENIUS_FALLBACKS[parseInt(yr)].description,
           achievements: [
             {
               id: parseInt(yr),
-              title: FOUNDRY_FALLBACKS[parseInt(yr)].title,
-              category: FOUNDRY_FALLBACKS[parseInt(yr)].tag,
+              title: RUBENIUS_FALLBACKS[parseInt(yr)].title,
+              category: RUBENIUS_FALLBACKS[parseInt(yr)].tag,
               date: `${yr}-01-01`,
             },
           ],
@@ -328,7 +330,7 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
           ] : [],
         }))
   ).map((item, idx) => {
-    const fallback = FOUNDRY_FALLBACKS[item.year];
+    const fallback = RUBENIUS_FALLBACKS[item.year];
     const chapter = `CH. ${String(idx + 1).padStart(2, "0")}`;
 
     const era = fallback?.era || (item.achievements?.[0]?.category ?? "Chapter");
@@ -546,7 +548,7 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
             <div className="body">
               {/* Floating media collage around the card */}
               <div className="media-floats" aria-hidden="true">
-                {(FOUNDRY_MEDIA[item.year] || []).map((m, mi) => (
+                {(RUBENIUS_MEDIA[item.year] || []).map((m, mi) => (
                   <figure
                     key={`media-${item.year}-${mi}`}
                     className={`media-piece pos-${m.pos} ${m.type === "video" ? "is-video" : "is-image"}`}
