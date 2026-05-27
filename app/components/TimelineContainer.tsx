@@ -870,9 +870,23 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
               <span className="y">{item.year}</span>
             </div>
             <div className="body">
-              {/* Floating media collage around the card */}
+              {/* Floating media collage around the card.
+                  Years with a curated RUBENIUS_MEDIA entry use it directly; years
+                  that only have DB-seeded assets (e.g. 2006-2015) are projected
+                  onto the same four corner slots so every year shares the
+                  around-the-card layout instead of falling back to an in-card grid. */}
               <div className="media-floats">
-                {(RUBENIUS_MEDIA[item.year] || []).map((m, mi) => {
+                {(() => {
+                  const curated = RUBENIUS_MEDIA[item.year];
+                  if (curated && curated.length > 0) return curated;
+                  const slots: MediaSlot[] = ["tl", "tr", "bl", "br"];
+                  return (item.assets || []).slice(0, slots.length).map<Media>((asset, i) => ({
+                    type: "image",
+                    url: asset.url,
+                    alt: asset.caption || "Timeline moment",
+                    pos: slots[i],
+                  }));
+                })().map((m, mi) => {
                   if (m.type === "image") {
                     return (
                       <figure
@@ -961,8 +975,11 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
                   </div>
                 )}
 
-                {/* Optional Media Gallery inside cards (DB-uploaded assets) */}
-                {item.assets && item.assets.length > 0 && (
+                {/* Optional Media Gallery inside cards (DB-uploaded assets).
+                    Only shown for years where a curated RUBENIUS_MEDIA entry already
+                    occupies the floating slots; otherwise the assets render as the
+                    floating collage above and the in-card grid is skipped. */}
+                {item.assets && item.assets.length > 0 && RUBENIUS_MEDIA[item.year] && (
                   <div className="card-media">
                     {item.assets.map((asset) => (
                       <div
