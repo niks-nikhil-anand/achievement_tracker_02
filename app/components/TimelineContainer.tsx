@@ -401,6 +401,21 @@ interface ProcessedItem {
   assets: Array<{ id: number; url: string; caption: string | null; month: number }>;
 }
 
+// Pick an award icon from a free-form category string — used when DB achievements
+// supply the awards list (no hardcoded fallback). Keep matches loose and case-insensitive.
+function iconForCategory(category: string): AwardIconName {
+  const c = category.toLowerCase();
+  if (/(found|origin|anniv)/.test(c)) return "sparkles";
+  if (/(retail|jewell|multiplex|shop)/.test(c)) return "trophy";
+  if (/(studio|workspace|commercial|office|contract|build)/.test(c)) return "building";
+  if (/(designer|young|future|creative)/.test(c)) return "star";
+  if (/(international|paris|global|lexus|world)/.test(c)) return "globe";
+  if (/(innov|smart|tech|sustain|pandemic|hub)/.test(c)) return "lightbulb";
+  if (/(customer|leader|quality|service|industry)/.test(c)) return "shield";
+  if (/(recogn|excellence|honour|honor|top)/.test(c)) return "ribbon";
+  return "medal";
+}
+
 // Inline SVG paths for each award icon — minimal Lucide-style strokes
 function AwardIcon({ name }: { name: AwardIconName }) {
   const common = {
@@ -558,6 +573,14 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
       ];
     }
 
+    const derivedAwards: AwardItem[] =
+      fallback?.awards ??
+      (item.achievements?.map((a) => ({
+        icon: iconForCategory(a.category),
+        name: a.title,
+        category: a.category,
+      })) ?? []);
+
     return {
       id: item.id,
       year: item.year,
@@ -568,7 +591,7 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
       title,
       description,
       stats,
-      awards: fallback?.awards ?? [],
+      awards: derivedAwards,
       assets: item.assets || [],
     };
   }), [initialYears]);
