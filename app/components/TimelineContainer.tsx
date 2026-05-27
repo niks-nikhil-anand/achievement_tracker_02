@@ -275,6 +275,19 @@ const RB = {
   kewaunee: `${R_CDN2}/65f57f88932733bcfc487e99_Website%20Project%20images.avif`,
 };
 
+// Shared pool used to pad any year that doesn't have 4 media pieces of its own
+// — keeps every card's floating collage in the same 4-slot format.
+const MEDIA_FALLBACK_POOL: string[] = [
+  RB.scroll,
+  RB.untitled3,
+  RB.redsShift12,
+  RB.redsShift17,
+  RB.redsShift21,
+  RB.scaler,
+  RB.kewaunee,
+  RB.schneiderCard,
+];
+
 const RUBENIUS_MEDIA: Record<number, Media[]> = {
   2005: [
     { type: "image", url: RB.scroll, alt: "Rubenius brand wordmark", pos: "tl" },
@@ -364,6 +377,59 @@ const RUBENIUS_MEDIA: Record<number, Media[]> = {
     { type: "image", url: RB.redsShift12, alt: "REDS — still shaping memory", pos: "br" },
   ],
 };
+
+// Always returns exactly 4 Media pieces in slots tl/tr/bl/br.
+// DB-seeded assets are preferred (per the prioritize-DB-assets policy),
+// then curated RUBENIUS_MEDIA for that year, then the shared fallback pool.
+function buildYearMedia(
+  year: number,
+  dbAssets: Array<{ id: number; url: string; caption: string | null; month: number }>
+): Media[] {
+  const slots: MediaSlot[] = ["tl", "tr", "bl", "br"];
+  const curated = RUBENIUS_MEDIA[year];
+
+  // Curated entries already have correct positions — use as-is when complete.
+  if ((!dbAssets || dbAssets.length === 0) && curated && curated.length >= 4) {
+    return curated.slice(0, 4);
+  }
+
+  const out: Media[] = [];
+  const used = new Set<string>();
+
+  for (const asset of dbAssets || []) {
+    if (out.length >= 4) break;
+    if (used.has(asset.url)) continue;
+    out.push({
+      type: "image",
+      url: asset.url,
+      alt: asset.caption || "Timeline moment",
+      pos: slots[out.length],
+    });
+    used.add(asset.url);
+  }
+
+  for (const m of curated || []) {
+    if (out.length >= 4) break;
+    const key = m.type === "image" ? m.url : m.poster;
+    if (used.has(key)) continue;
+    out.push({ ...m, pos: slots[out.length] });
+    used.add(key);
+  }
+
+  for (const url of MEDIA_FALLBACK_POOL) {
+    if (out.length >= 4) break;
+    if (used.has(url)) continue;
+    out.push({
+      type: "image",
+      url,
+      alt: "Rubenius archival image",
+      pos: slots[out.length],
+    });
+    used.add(url);
+  }
+
+  return out;
+}
 
 interface DBYear {
   id: number;
@@ -500,6 +566,79 @@ function AwardIcon({ name }: { name: AwardIconName }) {
         </svg>
       );
   }
+}
+
+// Shared floating-collage component — every year card renders the same 4-slot
+// layout (tl/tr/bl/br). Keeps the format identical across curated, DB-seeded,
+// and fallback-padded years.
+interface MediaCollageProps {
+  media: Media[];
+  year: number;
+  onVideoOpen: (video: { embedUrl?: string; videoUrl?: string; title: string }) => void;
+}
+
+function MediaCollage({ media, year, onVideoOpen }: MediaCollageProps) {
+  return (
+    <div className="media-floats">
+      {media.map((m, mi) => {
+        if (m.type === "image") {
+          return (
+            <figure
+              key={`media-${year}-${mi}`}
+              className={`media-piece pos-${m.pos} is-image`}
+              style={{ animationDelay: `${mi * 90}ms` }}
+              aria-hidden="true"
+            >
+              <img
+                src={m.url}
+                alt={m.alt}
+                loading="lazy"
+                onError={(e) => {
+                  (e.currentTarget.parentElement as HTMLElement).style.display = "none";
+                }}
+              />
+            </figure>
+          );
+        }
+        return (
+          <button
+            key={`media-${year}-${mi}`}
+            type="button"
+            className={`media-piece pos-${m.pos} is-video`}
+            style={{ animationDelay: `${mi * 90}ms` }}
+            aria-label={m.alt}
+            onClick={() =>
+              onVideoOpen({
+                embedUrl: m.embedUrl,
+                videoUrl: m.videoUrl,
+                title: m.title ?? m.alt,
+              })
+            }
+          >
+            <img
+              src={m.poster}
+              alt=""
+              loading="lazy"
+              onError={(e) => {
+                (e.currentTarget.parentElement as HTMLElement).style.display = "none";
+              }}
+            />
+            <span className="media-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+            <span className="media-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              WATCH
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function TimelineContainer({ initialYears }: TimelineContainerProps) {
@@ -870,80 +1009,13 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
               <span className="y">{item.year}</span>
             </div>
             <div className="body">
-              {/* Floating media collage around the card. DB assets are the source
-                  of truth — they project onto the four corner slots. Years with no
-                  DB assets fall back to the curated RUBENIUS_MEDIA entry so every
-                  year shares the same around-the-card layout. */}
-              <div className="media-floats">
-                {(() => {
-                  const slots: MediaSlot[] = ["tl", "tr", "bl", "br"];
-                  if (item.assets && item.assets.length > 0) {
-                    return item.assets.slice(0, slots.length).map<Media>((asset, i) => ({
-                      type: "image",
-                      url: asset.url,
-                      alt: asset.caption || "Timeline moment",
-                      pos: slots[i],
-                    }));
-                  }
-                  return RUBENIUS_MEDIA[item.year] ?? [];
-                })().map((m, mi) => {
-                  if (m.type === "image") {
-                    return (
-                      <figure
-                        key={`media-${item.year}-${mi}`}
-                        className={`media-piece pos-${m.pos} is-image`}
-                        style={{ animationDelay: `${mi * 90}ms` }}
-                        aria-hidden="true"
-                      >
-                        <img
-                          src={m.url}
-                          alt={m.alt}
-                          loading="lazy"
-                          onError={(e) => {
-                            (e.currentTarget.parentElement as HTMLElement).style.display = "none";
-                          }}
-                        />
-                      </figure>
-                    );
-                  }
-                  return (
-                    <button
-                      key={`media-${item.year}-${mi}`}
-                      type="button"
-                      className={`media-piece pos-${m.pos} is-video`}
-                      style={{ animationDelay: `${mi * 90}ms` }}
-                      aria-label={m.alt}
-                      onClick={() =>
-                        setActiveVideo({
-                          embedUrl: m.embedUrl,
-                          videoUrl: m.videoUrl,
-                          title: m.title ?? m.alt,
-                        })
-                      }
-                    >
-                      <img
-                        src={m.poster}
-                        alt=""
-                        loading="lazy"
-                        onError={(e) => {
-                          (e.currentTarget.parentElement as HTMLElement).style.display = "none";
-                        }}
-                      />
-                      <span className="media-play" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </span>
-                      <span className="media-badge" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                        WATCH
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Floating media collage around the card — always 4 pieces in
+                  tl/tr/bl/br via buildYearMedia (DB assets → curated → fallback). */}
+              <MediaCollage
+                media={buildYearMedia(item.year, item.assets)}
+                year={item.year}
+                onVideoOpen={setActiveVideo}
+              />
 
               <div className="card">
                 <div className="tag">

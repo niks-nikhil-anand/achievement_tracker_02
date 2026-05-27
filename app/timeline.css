@@ -1367,8 +1367,21 @@ button.media-piece:focus-visible {
   .ghost-years-container {
     display: none;
   }
+  /* Keep the 4-piece collage visible on tablets, just sized to the card */
   .media-floats {
-    display: none;
+    inset: -16px -4vw;
+  }
+  .media-piece {
+    width: clamp(96px, 14vw, 150px);
+    border-radius: 12px;
+  }
+  .media-piece.pos-tl { top: -8px;  left: -2vw; }
+  .media-piece.pos-tr { top: -22px; right: -2vw; }
+  .media-piece.pos-bl { bottom: 24px; left: -1vw; }
+  .media-piece.pos-br { bottom: 8px;  right: -1vw; }
+  .media-piece .media-play {
+    width: 44px;
+    height: 44px;
   }
   .timeline-mini {
     bottom: 24px;
@@ -1381,6 +1394,31 @@ button.media-piece:focus-visible {
 @media (max-width: 720px) {
   .timeline-item .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* On phones, drop the floating collage into a tidy 2x2 grid below the card
+     so all four pieces stay visible without overlapping the text. */
+  .media-floats {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .media-piece {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    transform: none !important;
+    --rot: 0deg;
+  }
+  .media-piece.is-video {
+    aspect-ratio: 4 / 5;
+  }
+  .media-piece .media-play {
+    width: 38px;
+    height: 38px;
   }
 }
 
