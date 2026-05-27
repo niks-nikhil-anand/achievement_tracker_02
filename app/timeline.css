@@ -1038,7 +1038,7 @@ button.media-piece:focus-visible {
 }
 
 .timeline-item p {
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.65;
   color: var(--text-2);
   max-width: 56ch;

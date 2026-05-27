@@ -870,22 +870,22 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
               <span className="y">{item.year}</span>
             </div>
             <div className="body">
-              {/* Floating media collage around the card.
-                  Years with a curated RUBENIUS_MEDIA entry use it directly; years
-                  that only have DB-seeded assets (e.g. 2006-2015) are projected
-                  onto the same four corner slots so every year shares the
-                  around-the-card layout instead of falling back to an in-card grid. */}
+              {/* Floating media collage around the card. DB assets are the source
+                  of truth — they project onto the four corner slots. Years with no
+                  DB assets fall back to the curated RUBENIUS_MEDIA entry so every
+                  year shares the same around-the-card layout. */}
               <div className="media-floats">
                 {(() => {
-                  const curated = RUBENIUS_MEDIA[item.year];
-                  if (curated && curated.length > 0) return curated;
                   const slots: MediaSlot[] = ["tl", "tr", "bl", "br"];
-                  return (item.assets || []).slice(0, slots.length).map<Media>((asset, i) => ({
-                    type: "image",
-                    url: asset.url,
-                    alt: asset.caption || "Timeline moment",
-                    pos: slots[i],
-                  }));
+                  if (item.assets && item.assets.length > 0) {
+                    return item.assets.slice(0, slots.length).map<Media>((asset, i) => ({
+                      type: "image",
+                      url: asset.url,
+                      alt: asset.caption || "Timeline moment",
+                      pos: slots[i],
+                    }));
+                  }
+                  return RUBENIUS_MEDIA[item.year] ?? [];
                 })().map((m, mi) => {
                   if (m.type === "image") {
                     return (
@@ -972,25 +972,6 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
                         </li>
                       ))}
                     </ul>
-                  </div>
-                )}
-
-                {/* Optional Media Gallery inside cards (DB-uploaded assets).
-                    Only shown for years where a curated RUBENIUS_MEDIA entry already
-                    occupies the floating slots; otherwise the assets render as the
-                    floating collage above and the in-card grid is skipped. */}
-                {item.assets && item.assets.length > 0 && RUBENIUS_MEDIA[item.year] && (
-                  <div className="card-media">
-                    {item.assets.map((asset) => (
-                      <div
-                        key={asset.id}
-                        className="media-thumb animate-in fade-in"
-                        onClick={() => setActiveMedia({ url: asset.url, caption: asset.caption })}
-                        title={asset.caption || "View image"}
-                      >
-                        <img src={asset.url} alt={asset.caption || "Timeline moment"} />
-                      </div>
-                    ))}
                   </div>
                 )}
 
