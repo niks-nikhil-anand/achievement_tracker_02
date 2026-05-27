@@ -19,6 +19,12 @@ interface AwardItem {
   category: string;
 }
 
+// Only these years are rendered on the timeline — any other year in the DB
+// or fallback narrative is filtered out.
+const ALLOWED_YEARS = new Set<number>([
+  2005, 2008, 2011, 2014, 2016, 2018, 2020, 2021, 2022, 2023, 2024, 2025, 2026,
+]);
+
 // Fallback timeline data for Rubenius Interiors — sourced from rubenius.in awards & milestones
 const RUBENIUS_FALLBACKS: Record<
   number,
@@ -676,23 +682,27 @@ export default function TimelineContainer({ initialYears }: TimelineContainerPro
   // Process data: combine DB rows with the Rubenius fallback narrative
   const processedItems: ProcessedItem[] = useMemo(() => (
     initialYears && initialYears.length > 0
-      ? [...initialYears].sort((a, b) => a.year - b.year)
-      : Object.keys(RUBENIUS_FALLBACKS).map((yr) => ({
-          id: yr,
-          year: parseInt(yr),
-          about: RUBENIUS_FALLBACKS[parseInt(yr)].description,
-          achievements: [
-            {
-              id: parseInt(yr),
-              title: RUBENIUS_FALLBACKS[parseInt(yr)].title,
-              category: RUBENIUS_FALLBACKS[parseInt(yr)].tag,
-              date: `${yr}-01-01`,
-            },
-          ],
-          assets: parseInt(yr) === 2008 ? [
-            { id: 1, url: "/extracted_ui/uploads/Screenshot 2026-05-25 at 12.59.32 PM.png", caption: "Team trailer outside Baytown", month: 5 }
-          ] : [],
-        }))
+      ? [...initialYears]
+          .filter((y) => ALLOWED_YEARS.has(y.year))
+          .sort((a, b) => a.year - b.year)
+      : Object.keys(RUBENIUS_FALLBACKS)
+          .filter((yr) => ALLOWED_YEARS.has(parseInt(yr)))
+          .map((yr) => ({
+            id: yr,
+            year: parseInt(yr),
+            about: RUBENIUS_FALLBACKS[parseInt(yr)].description,
+            achievements: [
+              {
+                id: parseInt(yr),
+                title: RUBENIUS_FALLBACKS[parseInt(yr)].title,
+                category: RUBENIUS_FALLBACKS[parseInt(yr)].tag,
+                date: `${yr}-01-01`,
+              },
+            ],
+            assets: parseInt(yr) === 2008 ? [
+              { id: 1, url: "/extracted_ui/uploads/Screenshot 2026-05-25 at 12.59.32 PM.png", caption: "Team trailer outside Baytown", month: 5 }
+            ] : [],
+          }))
   ).map((item, idx) => {
     const fallback = RUBENIUS_FALLBACKS[item.year];
     const chapter = `CH. ${String(idx + 1).padStart(2, "0")}`;
