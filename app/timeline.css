@@ -717,8 +717,12 @@
   position: relative;
   margin-top: 60px;
   padding-top: 40px;
-  width: 100%;
-  max-width: 720px;
+  width: 720px;
+  max-width: 100%;
+  /* Lock body height so the floating media slots (anchored to .body) land at
+     the same coordinates on every year regardless of how much card content
+     there is. */
+  min-height: 720px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -951,6 +955,12 @@ button.media-piece:focus-visible {
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 36px 36px 40px;
+  /* Keep every card the same outer size — description can be 1 line or 8
+     lines, awards can be 0 or 8, the card box stays uniform. */
+  width: 100%;
+  min-height: 680px;
+  display: flex;
+  flex-direction: column;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   position: relative;
@@ -1041,7 +1051,12 @@ button.media-piece:focus-visible {
   font-size: 18px;
   line-height: 1.65;
   color: var(--text-2);
-  max-width: 56ch;
+  /* Description box is the same size on every year — width is the full card
+     interior, height reserves ~6 visual lines. Long copy wraps inside the
+     box, short copy still occupies the same vertical block. */
+  width: 100%;
+  max-width: 100%;
+  min-height: calc(1.65em * 6);
   text-wrap: pretty;
   margin: 0;
 }
@@ -1050,7 +1065,9 @@ button.media-piece:focus-visible {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px 24px;
-  margin-top: 32px;
+  /* Anchor stats to the bottom of the card (the card is flex-column with a
+     min-height) so short and tall content lands at the same baseline. */
+  margin-top: auto;
   padding-top: 24px;
   border-top: 1px solid var(--line);
 }
@@ -1349,8 +1366,11 @@ button.media-piece:focus-visible {
     top: 220px;
   }
   .timeline-item .body {
+    width: 100%;
     max-width: 100%;
     margin-top: 40px;
+    /* Tablet body height — still uniform across years, just smaller */
+    min-height: 640px;
   }
   .timeline-item .body::before {
     height: 36px;
@@ -1359,6 +1379,10 @@ button.media-piece:focus-visible {
   .timeline-item .card {
     padding: 28px 24px 32px;
     border-radius: 16px;
+    min-height: 600px;
+  }
+  .timeline-item p {
+    min-height: calc(1.65em * 5);
   }
   .timeline-item .stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1394,6 +1418,16 @@ button.media-piece:focus-visible {
 @media (max-width: 720px) {
   .timeline-item .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Phone body/card heights — uniform per year, just smaller */
+  .timeline-item .body {
+    min-height: 560px;
+  }
+  .timeline-item .card {
+    min-height: 520px;
+  }
+  .timeline-item p {
+    min-height: calc(1.65em * 4);
   }
   /* On phones, drop the floating collage into a tidy 2x2 grid below the card
      so all four pieces stay visible without overlapping the text. */
